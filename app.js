@@ -5,6 +5,7 @@ const request = require('request')
 const ejsMate = require('ejs-mate')
 const session = require('express-session')
 const flash = require('connect-flash')
+const methodOverride = require('method-override')
 
 const Movie = require('./models/movie')
 
@@ -26,6 +27,7 @@ const app = express();
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(methodOverride('_method'));
 app.engine('ejs', ejsMate)
 
 const sessionConfig = {
@@ -79,10 +81,15 @@ app.post('/watched', (req, res) => {
             movie.image = result.Poster
             movie.ratings = result.Ratings
             movie.genre = result.Genre
-            movie.save()
-            console.log(movie)
-            req.flash('success', 'Movie successfully added')
-            res.redirect('/watchlist')
+            if (movie) {
+                req.flash('error', 'This movie already exists.')
+                res.redirect('/')
+            } else {
+                movie.save()
+                console.log(movie)
+                req.flash('success', 'Movie successfully added')
+                res.redirect('/watchlist')
+            }
         } 
     })
 })
@@ -101,6 +108,13 @@ app.use((err, req, res, next) => {
     const { statusCode=500 } = err;
     if (!err.message) err.message = 'Oh no, something went wrong!'
     res.status(statusCode).render('error', { err });
+})
+
+app.delete('/watchlist/:id', async (req, res) => {
+    console.log(req.params.id)
+    await Movie.findByIdAndDelete(req.params.id);
+    req.flash(`Removed movie from watchlist`)
+    res.redirect('/watchlist')
 })
 
 app.listen(3000, () => {
