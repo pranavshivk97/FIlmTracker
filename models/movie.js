@@ -5,7 +5,8 @@ const MonvieSchema = new Schema({
     title: String,
     plot: String,
     image: String,
-    rating: Number
+    ratings: Array,
+    genre: String
 })
 
 module.exports = mongoose.model('Movie', MonvieSchema)
