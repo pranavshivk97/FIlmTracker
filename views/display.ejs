@@ -1,0 +1,47 @@
+<%- layout('layouts/boilerplate') %>
+
+<h1><%= result.Title %> (<%= result.Year %>)</h1>
+<!-- <h1>
+    <% for (let letter of result.Title.toUpperCase()) { %> 
+            <span><%= letter %></span>
+    <% } %>
+    (
+    <% for (let num of result.Year) { %>
+        <span><%= num %></span>
+    <% } %>
+    )
+</h1> -->
+<div class="row">
+    <div class="col-6">
+        <div class="card mb-3">
+            <img class='card-img-top' src="<%= result.Poster%>" alt="">
+            <div class="card-body">
+            <h5 class='card-title'><%= result.Actors %></h5>
+            <h6 class='card-subtitle'>Directed By: <%= result.Director %></h6>
+            <p class='card-text'><%= result.Plot %></p>
+        </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                Critic Ratings 
+            </div>
+            <ul class="list-group list-group-flush">
+                <% result.Ratings.forEach(rate => { %>
+                    <li class="list-group-item">
+                       <%= rate.Source %>: <%= rate.Value %>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
+    <button class='btn btn-success'>Add to Watched</button>   
+    <h2>User Reviews</h2>
+    <form action="">
+        <div class="mb-3">
+            <label class='form-label' for="body">Review</label>
+            <textarea class='form-label' name="body" id="body" cols="100" rows="10"></textarea>
+        </div>
+    </form> 
+    </div>
+</div>
