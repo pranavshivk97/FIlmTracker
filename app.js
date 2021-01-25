@@ -58,10 +58,12 @@ app.get('/search', (req, res) => {
     request(requestUrl, (error, response, body) => {
         if (!error && response.statusCode == 200) {
             const result = JSON.parse(body)
-            res.render('display', { result })
-        } else {
-            req.flash('error', 'Movie not found! Please try with another title.')
-            res.redirect('/')
+            if (result !== undefined || result !== null) {
+                res.render('display', { result })
+            } else {
+                req.flash("error", "Movie not found. Please try again")
+                res.redirect('/')
+            }
         }
     })
 })
@@ -80,9 +82,25 @@ app.post('/watched', (req, res) => {
             movie.save()
             console.log(movie)
             req.flash('success', 'Movie successfully added')
-            res.redirect('/')
+            res.redirect('/watchlist')
         } 
     })
+})
+
+app.get('/watchlist', (req, res) => {
+    Movie.find({}, (error, movies) => {
+        if (error) {
+            req.flash('error', error.message)
+        } else {
+            res.render('watchlist', { movies })
+        }
+    })
+})
+
+app.use((err, req, res, next) => {
+    const { statusCode=500 } = err;
+    if (!err.message) err.message = 'Oh no, something went wrong!'
+    res.status(statusCode).render('error', { err });
 })
 
 app.listen(3000, () => {
