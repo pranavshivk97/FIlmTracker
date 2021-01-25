@@ -2,7 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const MonvieSchema = new Schema({
-    title: String,
+    title: {
+        type: String,
+        unique: true
+    },
     plot: String,
     image: String,
     ratings: Array,

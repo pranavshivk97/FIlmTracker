@@ -1,6 +1,15 @@
 <%- layout('layouts/boilerplate') %>
+
 <h1>Watchlist</h1>
-<% movies.forEach(movie => { %>
-    <img src="<%= movie.image %>" alt="">
-    <h4><%= movie.title %></h4>
-<% }) %>
+<div class="row">
+    <% movies.forEach(movie => { %>
+        <div class="col-4">
+            <div class="card mb-3">
+                <img class='card-img-top' src="<%= movie.image %>" alt="">
+                <h4 class='card-title'><%= movie.title %></h4> 
+                <button class='btn btn-danger'>Remove</button>
+                <button class='btn btn-warning'>Add to Favorites</button>
+            </div>
+        </div>
+    <% }) %>
+</div>
