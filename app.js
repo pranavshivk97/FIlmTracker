@@ -81,15 +81,17 @@ app.post('/watched', (req, res) => {
             movie.image = result.Poster
             movie.ratings = result.Ratings
             movie.genre = result.Genre
-            if (movie) {
-                req.flash('error', 'This movie already exists.')
-                res.redirect('/')
-            } else {
-                movie.save()
-                console.log(movie)
-                req.flash('success', 'Movie successfully added')
-                res.redirect('/watchlist')
-            }
+            Movie.count({ title: movie.title }, (err, count) => {
+                if (count > 0) {
+                    req.flash('error', 'This movie already exists.')
+                    res.redirect('/')
+                } else {
+                    movie.save()
+                    console.log(movie)
+                    req.flash('success', 'Movie successfully added')
+                    res.redirect('/watchlist')
+                }
+            })
         } 
     })
 })
