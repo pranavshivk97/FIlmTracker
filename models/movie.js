@@ -9,7 +9,13 @@ const MonvieSchema = new Schema({
     plot: String,
     image: String,
     ratings: Array,
-    genre: String
+    genre: String,
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+        }
+    ]
 })
 
 module.exports = mongoose.model('Movie', MonvieSchema)

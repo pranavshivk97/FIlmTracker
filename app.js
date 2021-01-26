@@ -8,6 +8,7 @@ const flash = require('connect-flash')
 const methodOverride = require('method-override')
 
 const Movie = require('./models/movie')
+const Review = require('./models/comment')
 
 mongoose.connect('mongodb://localhost:27017/moviedb', {
     useNewUrlParser: true,
@@ -48,11 +49,13 @@ app.use((req, res, next) => {
     res.locals.success = req.flash('success')
     res.locals.error = req.flash('error')
     next()
-})
+})  
 
 app.get('/', (req, res) => {
     res.render('home')
 })
+
+// MOVIE ROUTES
 
 app.get('/search', (req, res) => {
     title = req.query.searchName
@@ -106,17 +109,32 @@ app.get('/watchlist', (req, res) => {
     })
 })
 
-app.use((err, req, res, next) => {
-    const { statusCode=500 } = err;
-    if (!err.message) err.message = 'Oh no, something went wrong!'
-    res.status(statusCode).render('error', { err });
-})
-
 app.delete('/watchlist/:id', async (req, res) => {
     console.log(req.params.id)
     await Movie.findByIdAndDelete(req.params.id);
     req.flash(`Removed movie from watchlist`)
     res.redirect('/watchlist')
+})
+
+// REVIEW ROUTES
+
+// app.get('/:movieId/reviews', (req, res) => {
+//     res.render('comments')
+// })
+
+// app.post('/:movieId/reviews', (req, res) => {
+//     const movie = Movie.findById(req.params.movieId)
+//     const review = new Review()
+//     review.rating = req.body.rating
+//     review.body = req.body.content
+//     console.log(review)
+//     res.send("DONE")
+// })
+
+app.use((err, req, res, next) => {
+    const { statusCode=500 } = err;
+    if (!err.message) err.message = 'Oh no, something went wrong!'
+    res.status(statusCode).render('error', { err });
 })
 
 app.listen(3000, () => {
