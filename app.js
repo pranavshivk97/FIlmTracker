@@ -6,6 +6,8 @@ const ejsMate = require('ejs-mate')
 const session = require('express-session')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
+const passport = require('passport')
+const localStrategy = require('passport-local')
 
 const Movie = require('./models/movie')
 const Comment = require('./models/comment')
@@ -45,6 +47,13 @@ const sessionConfig = {
 
 app.use(session(sessionConfig))
 app.use(flash())
+
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new localStrategy(User.authenticate))
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
 
 app.use((req, res, next) => {
     res.locals.success = req.flash('success')
@@ -144,6 +153,15 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err });
 })
 
+// USER ROUTES
+
+app.get('/register', (req, res) => {
+    res.render('register')
+})
+
+app.post('/register', (req, res) => {
+    
+})
 app.listen(3000, () => {
     console.log('Server has started...')
 })
