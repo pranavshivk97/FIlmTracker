@@ -7,7 +7,13 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true
-    }
+    },
+    // username: {
+    //     type: String,
+    //     required: true,
+    //     unique: true
+    // }
+    // password: String
 })
 
 userSchema.plugin(passportLocalMongoose)

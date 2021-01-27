@@ -11,6 +11,7 @@ const localStrategy = require('passport-local')
 
 const Movie = require('./models/movie')
 const Comment = require('./models/comment')
+const User = require('./models/user')
 
 mongoose.connect('mongodb://localhost:27017/moviedb', {
     useNewUrlParser: true,
@@ -50,7 +51,7 @@ app.use(flash())
 
 app.use(passport.initialize())
 app.use(passport.session())
-passport.use(new localStrategy(User.authenticate))
+passport.use(new localStrategy(User.authenticate()))
 
 passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
@@ -159,9 +160,43 @@ app.get('/register', (req, res) => {
     res.render('register')
 })
 
-app.post('/register', (req, res) => {
-    
+app.post('/register', async (req, res) => {
+    try {
+        console.log(req.body)
+        const { email, username, password } = req.body
+        const user = new User({ email, username, password })
+        const newUser = await User.register(user, password)
+        console.log(newUser)
+        req.login(newUser, err => {
+            if (err) return next(err)
+            req.flash("success", `Welcome ${username}!`)
+            res.redirect('/')
+        })
+    } catch(e) {
+        req.flash('error', e.message)
+        res.redirect('/register')
+    }
 })
+
+app.get('/login', (req, res) => {
+    res.render('login')
+})
+
+app.post('/login', passport.authenticate('local', { successRedirect: '/watchlist', successFlash: true, failureRedirect: '/login', failureFlash: true }), (req, res) => {
+    req.flash("success", "You're logged in!")
+    console.log(req.user.username)
+    // const redirectedUrl = req.session.returnTo || '/'
+    // console.log(req.session)
+    // delete req.session.returnTo
+    // res.redirect('/watchlist')
+})
+
+app.get('/logout', (req, res) => {
+    req.logout()
+    req.flash('success', "You're logged out")
+    res.redirect('/')
+})
+
 app.listen(3000, () => {
     console.log('Server has started...')
 })
