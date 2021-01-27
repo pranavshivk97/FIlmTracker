@@ -8,7 +8,7 @@ const flash = require('connect-flash')
 const methodOverride = require('method-override')
 
 const Movie = require('./models/movie')
-const Review = require('./models/comment')
+const Comment = require('./models/comment')
 
 mongoose.connect('mongodb://localhost:27017/moviedb', {
     useNewUrlParser: true,
@@ -26,6 +26,7 @@ db.once('open', () => {
 const app = express();
 
 app.set('view engine', 'ejs')
+app.use(express.urlencoded({ extended: true }))
 app.set('views', path.join(__dirname, 'views'))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(methodOverride('_method'));
@@ -63,11 +64,11 @@ app.get('/search', (req, res) => {
     request(requestUrl, (error, response, body) => {
         if (!error && response.statusCode == 200) {
             const result = JSON.parse(body)
-            if (result !== undefined || result !== null) {
-                res.render('display', { result })
+            if (result.Response === 'False') {
+                req.flash('error', result.Error)
+                res.redirect('back')
             } else {
-                req.flash("error", "Movie not found. Please try again")
-                res.redirect('/')
+                res.render('display', { result })
             }
         }
     })
@@ -118,18 +119,24 @@ app.delete('/watchlist/:id', async (req, res) => {
 
 // REVIEW ROUTES
 
-// app.get('/:movieId/reviews', (req, res) => {
-//     res.render('comments')
-// })
+app.get('/watchlist/:id/reviews', async (req, res) => {
+    const movie = await Movie.findById(req.params.id).populate('comments')
+    console.log(movie)
+    res.render('comments', { movie })
+})
 
-// app.post('/:movieId/reviews', (req, res) => {
-//     const movie = Movie.findById(req.params.movieId)
-//     const review = new Review()
-//     review.rating = req.body.rating
-//     review.body = req.body.content
-//     console.log(review)
-//     res.send("DONE")
-// })
+app.post('/watchlist/:id/reviews', async (req, res) => {
+    const movie = await Movie.findById(req.params.id);
+    const comment = new Comment(req.body.comment);
+    console.log(comment)
+    await comment.save()
+    movie.comments.push(comment)
+    await movie.save()
+    console.log(movie)
+    req.flash('success', 'Comment added successfully')
+    res.redirect(`/watchlist/${movie._id}/reviews`)
+    
+})
 
 app.use((err, req, res, next) => {
     const { statusCode=500 } = err;

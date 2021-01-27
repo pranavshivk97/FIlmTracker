@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
-const MonvieSchema = new Schema({
+const MovieSchema = new Schema({
     title: {
         type: String,
         unique: true
@@ -18,4 +18,4 @@ const MonvieSchema = new Schema({
     ]
 })
 
-module.exports = mongoose.model('Movie', MonvieSchema)
+module.exports = mongoose.model('Movie', MovieSchema)

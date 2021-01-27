@@ -11,6 +11,7 @@
                 <form action="">
                     <button formaction="/watchlist/<%= movie._id %>?_method=DELETE" formmethod="POST" class='btn btn-danger'>Remove</button>
                     <button class='btn btn-warning'>Add to Favorites</button>
+                    <a href='/watchlist/<%= movie._id %>/reviews' class='btn btn-info'>View Comments</a>
                 </form>
             </div>
         </div>

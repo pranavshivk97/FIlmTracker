@@ -29,11 +29,7 @@
         <a class='card-link btn btn-info' href='#'>View Recommendations</a>
         <form  class='d-inline' action="">
             <button formaction="/watched" formmethod="POST" class='btn btn-success'>Add to Watched</button>   
-            <button formaction="/reviews" formmethod="GET" class='btn btn-light'>Add a Review</button>
+            <button formaction="/watchlist/<%= result._id %>/reviews" formmethod="GET" class='btn btn-light'>Add a Review</button>
         </form>
-        <div class="card mb-3">
-            <h2>User Reviews</h2>
-        
-        </div>
     </div>
 </div>
