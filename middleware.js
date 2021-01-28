@@ -1,6 +1,6 @@
 const Movie = require('./models/movie')
 const Comment = require('./models/comment')
-const commentSchema = require('./schemas')
+const { commentSchema } = require('./schemas')
 const ExpressError = require('./utils/expressError')
 
 module.exports.isLoggedIn = (req, res, next) => {
@@ -16,7 +16,6 @@ module.exports.isLoggedIn = (req, res, next) => {
 module.exports.isMovieAuthor = async (req, res, next) => {
     const { id } = req.params;
     const movie = await Movie.findById(id)
-    console.log(movie, req.user._id)
     if (!movie.dbOwner.equals(req.user._id)) {
         req.flash('error', 'You do not have permission to access this')
         return res.redirect('/watchlist')
@@ -35,10 +34,9 @@ module.exports.isCommentAuthor = async (req, res, next) => {
 }
 
 module.exports.validateComment = (req, res, next) => {
-    const { error } = commentSchema.validate(eq.body);
+    const { error } = commentSchema.validate(req.body);
     if (error) {
         const msg = error.details.map(el => el.message).join(',')
-        // req.flash('error', msg)
         throw new ExpressError(msg, 400)
     } else {
         next()

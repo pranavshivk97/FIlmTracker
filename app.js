@@ -158,7 +158,7 @@ app.post('/watchlist/:id/comments', isLoggedIn, validateComment, catchAsync(asyn
     res.redirect(`/watchlist/${movie._id}/comments`)
 }))
 
-app.delete('/watchlist/:id/comments/:commentId', isCommentAuthor, catchAsync(async (req, res) => {
+app.delete('/watchlist/:id/comments/:commentId', isLoggedIn, isCommentAuthor, catchAsync(async (req, res) => {
     const { id, commentId } = req.params;
     await Movie.findByIdAndUpdate(id, {$pull: { comments: commentId }})
     await Comment.findByIdAndDelete(commentId)
@@ -197,7 +197,6 @@ app.get('/login', (req, res) => {
 app.post('/login', passport.authenticate('local', { successRedirect: '/watchlist', successFlash: true, failureRedirect: '/login', failureFlash: true }), (req, res) => {
     req.flash("success", "You're logged in!")
     console.log(req.user.username)
-    // res.redirect('/watchlist')
 })
 
 app.get('/logout', isLoggedIn, (req, res) => {
