@@ -1,39 +1,42 @@
 <%- layout('layouts/boilerplate') %>
 
+<% if (currentUser) { %>
+    <div class="card mb-3">
+        <h2>Leave A Review!</h2>
+        <form class='validated-form' action="/watchlist/<%= movie._id %>/comments" method="POST">
+            <div class="mb-3">
+                <label class='form-label' for="body">Rate: </label>
+                <fieldset class="starability-basic">
+                    <input type="radio" id="no-rate" class="input-no-rate" name="comment[rating]" value="0" checked aria-label="No rating." />
+                    <input type="radio" id="first-rate1" name="comment[rating]" value="1" />
+                    <label for="first-rate1" title="Terrible">1 star</label>
+                    <input type="radio" id="first-rate2" name="comment[rating]" value="2" />
+                    <label for="first-rate2" title="Not good">2 stars</label>
+                    <input type="radio" id="first-rate3" name="comment[rating]" value="3" />
+                    <label for="first-rate3" title="Average">3 stars</label>
+                    <input type="radio" id="first-rate4" name="comment[rating]" value="4" />
+                    <label for="first-rate4" title="Very good">4 stars</label>
+                    <input type="radio" id="first-rate5" name="comment[rating]" value="5" />
+                    <label for="first-rate5" title="Amazing">5 stars</label>
+                </fieldset>
+                <label class='form-label' for="body">Review</label>
+                <textarea class='form-control' name="comment[body]" id="body" cols="100" rows="8" required></textarea>
+                    <button class='btn btn-success'>Submit Review</button>
+            </div>
+        </form> 
+    </div>
+<% } %>
+    
 <div class="mb-3">
-    <h2>User Reviews</h2>
+    <h2>User Comments</h2>
     <% for (let comment of movie.comments) { %>
         <div class="card mb-3">
             <h6 class='card-title'>By: <%= comment.author.username %></h6>
-            <h6 class='card-subtitle'>Rating: <%= comment.rating %>/5</h6>
+            <h6 class='card-subtitle'>Rating: <%= comment.rating %></h6>
             <p class='card-subtitle'><%= comment.body %></p>
-            <button class='btn btn-sm btn-danger' formaction="/watchlist/<%= movie._id %>/reviews/<%= comment._id %>?_method=DELETE" formmethod="POST">Delete</button>
+            <form action="/watchlist/<%= movie._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST">
+                <button class='btn btn-sm btn-danger'">Delete</button>
+            </form>
         </div>
     <% } %>
 </div>
-<% if (currentUser) { %>
-<div class="card mb-3">
-    <h2>Leave A Review!</h2>
-    <form class='validated-form' action="/watchlist/<%= movie._id %>/reviews" method="POST">
-        <div class="mb-3">
-            <label class='form-label' for="body">Rate: </label>
-            <fieldset class="starability-basic">
-                <input type="radio" id="no-rate" class="input-no-rate" name="comment[rating]" value="0" checked aria-label="No rating." />
-                <input type="radio" id="first-rate1" name="comment[rating]" value="1" />
-                <label for="first-rate1" title="Terrible">1 star</label>
-                <input type="radio" id="first-rate2" name="comment[rating]" value="2" />
-                <label for="first-rate2" title="Not good">2 stars</label>
-                <input type="radio" id="first-rate3" name="comment[rating]" value="3" />
-                <label for="first-rate3" title="Average">3 stars</label>
-                <input type="radio" id="first-rate4" name="comment[rating]" value="4" />
-                <label for="first-rate4" title="Very good">4 stars</label>
-                <input type="radio" id="first-rate5" name="comment[rating]" value="5" />
-                <label for="first-rate5" title="Amazing">5 stars</label>
-            </fieldset>
-            <label class='form-label' for="body">Review</label>
-            <textarea class='form-control' name="comment[body]" id="body" cols="100" rows="8"></textarea>
-                <button class='btn btn-success'>Submit Review</button>
-        </div>
-    </form> 
-</div>
-<% } %>

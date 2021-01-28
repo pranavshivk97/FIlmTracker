@@ -5,7 +5,7 @@
 <div class="row">
     <% if (currentUser) { %>
         <% movies.forEach(movie => { %>
-            <% if (movie.dbOwner.equals(currentUser._id)) { %>
+            <!-- <% if (movie.dbOwner.equals(currentUser._id)) { %> -->
                 <div class="col-4">
                     <div class="card mb-3">
                         <img class='card-img-top' src="<%= movie.image %>" alt="">
@@ -15,11 +15,11 @@
                             <button formaction="/watchlist/<%= movie._id %>?_method=DELETE" formmethod="POST" class='btn btn-danger'>Remove</button>
                             <button class='btn btn-warning'>Add to Favorites</button>
                         <% } %>
-                            <a href='/watchlist/<%= movie._id %>/reviews' class='btn btn-info'>View Comments</a>
+                            <a href='/watchlist/<%= movie._id %>/comments' class='btn btn-info'>View Comments</a>
                         </form>
                     </div>
                 </div>
-            <% } %>
+            <!-- <% } %> -->
         <% }) %>
     <% } else { %>
         <h3>Log in to see your watchlist!</h3>

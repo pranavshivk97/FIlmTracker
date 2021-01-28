@@ -12,7 +12,9 @@ const localStrategy = require('passport-local')
 const Movie = require('./models/movie')
 const Comment = require('./models/comment')
 const User = require('./models/user');
-const { isLoggedIn } = require('./middleware');
+const { isLoggedIn, isMovieAuthor, isCommentAuthor, validateComment } = require('./middleware');
+const catchAsync = require('./utils/catchAsync')
+const ExpressError = require('./utils/expressError')
 
 mongoose.connect('mongodb://localhost:27017/moviedb', {
     useNewUrlParser: true,
@@ -123,7 +125,7 @@ app.get('/watchlist', isLoggedIn, (req, res) => {
     })
 })
 
-app.delete('/watchlist/:id', isLoggedIn, async (req, res) => {
+app.delete('/watchlist/:id', isLoggedIn, isMovieAuthor, async (req, res) => {
     console.log(req.params.id)
     await Movie.findByIdAndDelete(req.params.id);
     req.flash(`Removed movie from watchlist`)
@@ -132,7 +134,7 @@ app.delete('/watchlist/:id', isLoggedIn, async (req, res) => {
 
 // REVIEW ROUTES
 
-app.get('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
+app.get('/watchlist/:id/comments', isLoggedIn, catchAsync(async (req, res) => {
     const movie = await Movie.findById(req.params.id).populate({
         path: 'comments',
         populate: {
@@ -141,9 +143,9 @@ app.get('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
     }).populate('dbOwner')
     console.log(movie)
     res.render('comments', { movie })
-})
+}))
 
-app.post('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
+app.post('/watchlist/:id/comments', isLoggedIn, validateComment, catchAsync(async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     const comment = new Comment(req.body.comment);
     comment.author = req.user._id
@@ -153,16 +155,16 @@ app.post('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
     await movie.save()
     console.log(movie)
     req.flash('success', 'Comment added successfully')
-    res.redirect(`/watchlist/${movie._id}/reviews`)
-})
+    res.redirect(`/watchlist/${movie._id}/comments`)
+}))
 
-app.delete('/watchlist/:id/reviews/:reviewId', async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Movie.findByIdAndUpdate(id, {$pull: { comments: reviewId }})
-    await Comment.findByIdAndDelete(reviewId)
+app.delete('/watchlist/:id/comments/:commentId', isCommentAuthor, catchAsync(async (req, res) => {
+    const { id, commentId } = req.params;
+    await Movie.findByIdAndUpdate(id, {$pull: { comments: commentId }})
+    await Comment.findByIdAndDelete(commentId)
     req.flash('success', 'Review deleted successfully')
-    res.redirect(`/watchlist/${id}/reviews`)
-})
+    res.redirect(`/watchlist/${id}/comments`)
+}))
 
 // USER ROUTES
 
@@ -170,7 +172,7 @@ app.get('/register', (req, res) => {
     res.render('register')
 })
 
-app.post('/register', async (req, res) => {
+app.post('/register', catchAsync(async (req, res) => {
     try {
         console.log(req.body)
         const { email, username, password } = req.body
@@ -186,7 +188,7 @@ app.post('/register', async (req, res) => {
         req.flash('error', e.message)
         res.redirect('/register')
     }
-})
+}))
 
 app.get('/login', (req, res) => {
     res.render('login')
@@ -195,9 +197,6 @@ app.get('/login', (req, res) => {
 app.post('/login', passport.authenticate('local', { successRedirect: '/watchlist', successFlash: true, failureRedirect: '/login', failureFlash: true }), (req, res) => {
     req.flash("success", "You're logged in!")
     console.log(req.user.username)
-    const redirectedUrl = req.session.returnTo || '/'
-    console.log(req.session)
-    delete req.session.returnTo
     // res.redirect('/watchlist')
 })
 
@@ -205,6 +204,10 @@ app.get('/logout', isLoggedIn, (req, res) => {
     req.logout()
     req.flash('success', "You're logged out")
     res.redirect('/')
+})
+
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page Not Found', 404))
 })
 
 app.use((err, req, res, next) => {
