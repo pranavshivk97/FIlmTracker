@@ -7,13 +7,14 @@
             <h6 class='card-title'>By: <%= comment.author.username %></h6>
             <h6 class='card-subtitle'>Rating: <%= comment.rating %>/5</h6>
             <p class='card-subtitle'><%= comment.body %></p>
+            <button class='btn btn-sm btn-danger' formaction="/watchlist/<%= movie._id %>/reviews/<%= comment._id %>?_method=DELETE" formmethod="POST">Delete</button>
         </div>
     <% } %>
 </div>
 <% if (currentUser) { %>
 <div class="card mb-3">
     <h2>Leave A Review!</h2>
-    <form action="/watchlist/<%= movie._id %>/reviews" method="POST">
+    <form class='validated-form' action="/watchlist/<%= movie._id %>/reviews" method="POST">
         <div class="mb-3">
             <label class='form-label' for="body">Rate: </label>
             <fieldset class="starability-basic">

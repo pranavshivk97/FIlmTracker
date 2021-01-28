@@ -1,7 +1,7 @@
 <%- layout('layouts/boilerplate') %>
 
 <h2>Log In</h2>
-<form action='/login' method='POST' novalidate>
+<form class='validated-form' action='/login' method='POST' novalidate>
     <div class="mb-3">
         <label for="username" class="form-label">User Name:</label>
         <input type="text" class="form-control" id="username" name='username' aria-describedby="usernameHelp" required>

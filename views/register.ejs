@@ -1,7 +1,7 @@
 <%- layout('layouts/boilerplate') %>
 <h2>Register</h2>
 <h4>Sign up now for a free account!</h4>
-<form action='/register' method='POST' novalidate>
+<form class='validated-form' action='/register' method='POST' novalidate>
     <div class="mb-3">
       <label for="email" class="form-label">Email ID:</label>
       <input type="email" class="form-control" id="email" name='email' aria-describedby="emailHelp" required>

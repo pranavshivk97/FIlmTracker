@@ -156,6 +156,14 @@ app.post('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
     res.redirect(`/watchlist/${movie._id}/reviews`)
 })
 
+app.delete('/watchlist/:id/reviews/:reviewId', async (req, res) => {
+    const { id, reviewId } = req.params;
+    await Movie.findByIdAndUpdate(id, {$pull: { comments: reviewId }})
+    await Comment.findByIdAndDelete(reviewId)
+    req.flash('success', 'Review deleted successfully')
+    res.redirect(`/watchlist/${id}/reviews`)
+})
+
 // USER ROUTES
 
 app.get('/register', (req, res) => {
