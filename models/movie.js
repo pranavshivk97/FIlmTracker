@@ -10,6 +10,10 @@ const MovieSchema = new Schema({
     image: String,
     ratings: Array,
     genre: String,
+    dbOwner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     comments: [
         {
             type: Schema.Types.ObjectId,

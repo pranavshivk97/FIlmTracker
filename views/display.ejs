@@ -27,9 +27,11 @@
             </ul>
         </div>
         <a class='card-link btn btn-info' href='#'>View Recommendations</a>
+        <% if (currentUser) { %>
         <form  class='d-inline' action="">
             <button formaction="/watched" formmethod="POST" class='btn btn-success'>Add to Watched</button>   
             <button formaction="/watchlist/<%= result._id %>/reviews" formmethod="GET" class='btn btn-light'>Add a Review</button>
         </form>
+        <% } %>
     </div>
 </div>

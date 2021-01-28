@@ -1,12 +1,16 @@
 <%- layout('layouts/boilerplate') %>
 
-<div class="card mb-3">
+<div class="mb-3">
     <h2>User Reviews</h2>
     <% for (let comment of movie.comments) { %>
-        <h6 class='card-title'>Rating: <%= comment.rating %></h6>
-        <p class='card-subtitle'>Body: <%= comment.body %></p>
+        <div class="card mb-3">
+            <h6 class='card-title'>By: <%= comment.author.username %></h6>
+            <h6 class='card-subtitle'>Rating: <%= comment.rating %>/5</h6>
+            <p class='card-subtitle'><%= comment.body %></p>
+        </div>
     <% } %>
 </div>
+<% if (currentUser) { %>
 <div class="card mb-3">
     <h2>Leave A Review!</h2>
     <form action="/watchlist/<%= movie._id %>/reviews" method="POST">
@@ -31,3 +35,4 @@
         </div>
     </form> 
 </div>
+<% } %>

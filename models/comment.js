@@ -3,7 +3,11 @@ const Schema = mongoose.Schema;
 
 const commentSchema = Schema({
     rating: Number,
-    body: String
+    body: String,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 module.exports = mongoose.model('Comment', commentSchema)

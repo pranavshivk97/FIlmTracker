@@ -1,19 +1,32 @@
 <%- layout('layouts/boilerplate') %>
 
-<h1>Watchlist</h1>
+<h1>Your Watchlist</h1>
 <a href="/">Back</a>
 <div class="row">
-    <% movies.forEach(movie => { %>
-        <div class="col-4">
-            <div class="card mb-3">
-                <img class='card-img-top' src="<%= movie.image %>" alt="">
-                <h4 class='card-title'><%= movie.title %></h4> 
-                <form action="">
-                    <button formaction="/watchlist/<%= movie._id %>?_method=DELETE" formmethod="POST" class='btn btn-danger'>Remove</button>
-                    <button class='btn btn-warning'>Add to Favorites</button>
-                    <a href='/watchlist/<%= movie._id %>/reviews' class='btn btn-info'>View Comments</a>
-                </form>
-            </div>
-        </div>
-    <% }) %>
-</div>
+    <% if (currentUser) { %>
+        <% movies.forEach(movie => { %>
+            <% if (movie.dbOwner.equals(currentUser._id)) { %>
+                <div class="col-4">
+                    <div class="card mb-3">
+                        <img class='card-img-top' src="<%= movie.image %>" alt="">
+                        <h4 class='card-title'><%= movie.title %></h4> 
+                        <% if (movie.dbOwner.equals(currentUser._id)) { %>
+                        <form action="">
+                            <button formaction="/watchlist/<%= movie._id %>?_method=DELETE" formmethod="POST" class='btn btn-danger'>Remove</button>
+                            <button class='btn btn-warning'>Add to Favorites</button>
+                        <% } %>
+                            <a href='/watchlist/<%= movie._id %>/reviews' class='btn btn-info'>View Comments</a>
+                        </form>
+                    </div>
+                </div>
+            <% } %>
+        <% }) %>
+    <% } else { %>
+        <h3>Log in to see your watchlist!</h3>
+        <a href="/login" class='btn btn-primary'>Log In</a>
+        <hr>
+        <h3>OR</h3>
+        <h3>Register for a free account!</h3>
+        <a href="/register" class='btn btn-primary'>Register</a>
+    <% } %>
+</div> 

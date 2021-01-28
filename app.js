@@ -11,7 +11,8 @@ const localStrategy = require('passport-local')
 
 const Movie = require('./models/movie')
 const Comment = require('./models/comment')
-const User = require('./models/user')
+const User = require('./models/user');
+const { isLoggedIn } = require('./middleware');
 
 mongoose.connect('mongodb://localhost:27017/moviedb', {
     useNewUrlParser: true,
@@ -57,6 +58,7 @@ passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
 
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user
     res.locals.success = req.flash('success')
     res.locals.error = req.flash('error')
     next()
@@ -84,7 +86,7 @@ app.get('/search', (req, res) => {
     })
 })
 
-app.post('/watched', (req, res) => {
+app.post('/watched', isLoggedIn, (req, res) => {
     const movie = new Movie()
     requestUrl = `http://www.omdbapi.com/?t=${title}&apikey=1303fcca&plot=full`
     request(requestUrl, (error, response, body) => {
@@ -95,6 +97,7 @@ app.post('/watched', (req, res) => {
             movie.image = result.Poster
             movie.ratings = result.Ratings
             movie.genre = result.Genre
+            movie.dbOwner = req.user._id
             Movie.count({ title: movie.title }, (err, count) => {
                 if (count > 0) {
                     req.flash('error', 'This movie already exists.')
@@ -110,7 +113,7 @@ app.post('/watched', (req, res) => {
     })
 })
 
-app.get('/watchlist', (req, res) => {
+app.get('/watchlist', isLoggedIn, (req, res) => {
     Movie.find({}, (error, movies) => {
         if (error) {
             req.flash('error', error.message)
@@ -120,7 +123,7 @@ app.get('/watchlist', (req, res) => {
     })
 })
 
-app.delete('/watchlist/:id', async (req, res) => {
+app.delete('/watchlist/:id', isLoggedIn, async (req, res) => {
     console.log(req.params.id)
     await Movie.findByIdAndDelete(req.params.id);
     req.flash(`Removed movie from watchlist`)
@@ -129,15 +132,21 @@ app.delete('/watchlist/:id', async (req, res) => {
 
 // REVIEW ROUTES
 
-app.get('/watchlist/:id/reviews', async (req, res) => {
-    const movie = await Movie.findById(req.params.id).populate('comments')
+app.get('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
+    const movie = await Movie.findById(req.params.id).populate({
+        path: 'comments',
+        populate: {
+            path: 'author'  
+        }
+    }).populate('dbOwner')
     console.log(movie)
     res.render('comments', { movie })
 })
 
-app.post('/watchlist/:id/reviews', async (req, res) => {
+app.post('/watchlist/:id/reviews', isLoggedIn, async (req, res) => {
     const movie = await Movie.findById(req.params.id);
     const comment = new Comment(req.body.comment);
+    comment.author = req.user._id
     console.log(comment)
     await comment.save()
     movie.comments.push(comment)
@@ -145,13 +154,6 @@ app.post('/watchlist/:id/reviews', async (req, res) => {
     console.log(movie)
     req.flash('success', 'Comment added successfully')
     res.redirect(`/watchlist/${movie._id}/reviews`)
-    
-})
-
-app.use((err, req, res, next) => {
-    const { statusCode=500 } = err;
-    if (!err.message) err.message = 'Oh no, something went wrong!'
-    res.status(statusCode).render('error', { err });
 })
 
 // USER ROUTES
@@ -185,16 +187,22 @@ app.get('/login', (req, res) => {
 app.post('/login', passport.authenticate('local', { successRedirect: '/watchlist', successFlash: true, failureRedirect: '/login', failureFlash: true }), (req, res) => {
     req.flash("success", "You're logged in!")
     console.log(req.user.username)
-    // const redirectedUrl = req.session.returnTo || '/'
-    // console.log(req.session)
-    // delete req.session.returnTo
+    const redirectedUrl = req.session.returnTo || '/'
+    console.log(req.session)
+    delete req.session.returnTo
     // res.redirect('/watchlist')
 })
 
-app.get('/logout', (req, res) => {
+app.get('/logout', isLoggedIn, (req, res) => {
     req.logout()
     req.flash('success', "You're logged out")
     res.redirect('/')
+})
+
+app.use((err, req, res, next) => {
+    const { statusCode=500 } = err;
+    if (!err.message) err.message = 'Oh no, something went wrong!'
+    res.status(statusCode).render('error', { err });
 })
 
 app.listen(3000, () => {
